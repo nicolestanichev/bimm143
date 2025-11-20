@@ -1,0 +1,65 @@
+---
+title: "HW Class 6 (R Function)"
+author: "Nicole (PID:A18116280)"
+format: pdf
+---
+
+
+```{r}
+# install.packages("bio3d")
+
+```
+
+```{r}
+library(bio3d)
+
+#---------------------------------------
+# Function: plot_bfactors
+#---------------------------------------
+# Inputs:
+#   pdb_ids – character vector of PDB IDs or file paths
+#   chain   – which chain to analyze (default "A")
+#   elety   – which atom type to analyze (default "CA")
+#
+# What it does:
+#   For each structure, the function:
+#     1. Reads the PDB file or downloads it.
+#     2. Extracts the specified chain and atom type.
+#     3. Retrieves the B-factors for those atoms.
+#     4. Plots the B-factor profile for each structure.
+#
+# Output:
+#   • A plot for each input structure showing B-factor vs. residue number.
+#   • Invisibly returns a named list of B-factor vectors for later analysis.
+#---------------------------------------
+
+plot_bfactors <- function(pdb_ids, chain = "A", elety = "CA") {
+  if (!is.character(pdb_ids)) stop("pdb_ids must be a character vector.")
+
+  b_list <- list()
+
+  for (id in pdb_ids) {
+    # read PDB file (downloads automatically if only ID is provided)
+    pdb <- read.pdb(id)
+
+    # keep only one chain and atom type
+    pdb_trim <- trim.pdb(pdb, chain = chain, elety = elety)
+
+    # extract B-factors
+    b_vals <- pdb_trim$atom$b
+    b_list[[id]] <- b_vals
+
+    # plot the B-factors
+    plotb3(b_vals,
+           sse = pdb_trim,
+           typ = "l",
+           ylab = "B-factor",
+           main = paste("B-factor profile:", id))
+  }
+
+  invisible(b_list)
+}
+
+# Example use:
+plot_bfactors(c("4AKE", "1AKE", "1E4Y"))
+```

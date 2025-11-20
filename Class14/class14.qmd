@@ -1,0 +1,228 @@
+---
+title: "Class 14: RNASeq mini project"
+author: "Nicole (PID: A18116280)"
+format: pdf
+toc: true
+---
+
+## Background 
+
+Here we work through a complete RNASeq analysis project. The input data comes from a knock-down experiment of a HDX gene. 
+## Data Import
+
+Reading the `count()` and `metadata` CSV files 
+
+
+```{r}
+counts <- read.csv("GSE37704_featurecounts (1).csv", row.names = 1)
+metadata <- read.csv("GSE37704_metadata.csv")
+```
+
+Check on data structure
+
+```{r}
+head(counts)
+```
+```{r}
+metadata
+```
+
+
+```{r}
+head(metadata)
+```
+
+Some book-keeping is required as there looks to be a mis-match between metadata and counts columns
+
+```{r}
+ncol(counts)
+```
+```{r}
+nrow(metadata)
+```
+
+Looks like we need to get rid of the first "length" column of our `counts` object. 
+
+```{r}
+cleancounts <- counts[ , -1]
+```
+
+```{r}
+colnames(cleancounts)
+```
+
+```{r}
+metadata$id
+```
+
+```{r}
+all( colnames(cleancounts) == metadata$id)
+```
+
+### Remove zero count genes
+
+There are lots of genes with zero counts. We can remove these from further analysis
+```{r}
+head(cleancounts)
+```
+
+```{r}
+to.keep.inds <- rowSums(cleancounts) > 0
+nonzero_counts <- cleancounts[to.keep.inds,]
+```
+
+## DESeq analysis
+Load the package
+
+```{r, message=FALSE}
+library(DESeq2)
+```
+
+Setup DESeq object
+
+```{r}
+dds <- DESeqDataSetFromMatrix(countData = nonzero_counts,
+                              colData = metadata,
+                              design = ~condition)
+```
+
+Run DESeq
+
+```{r}
+dds <-DESeq(dds)
+```
+
+get results
+
+```{r}
+res <- results(dds)
+head(res)
+```
+
+## Data Visualization
+
+```{r}
+library(ggplot2)
+
+ggplot(res) +
+  aes(log2FoldChange, -log(padj) ) +
+  geom_point()
+
+```
+
+Add threshold lines for fold-change and P-value and color our subset of genes that make these threshold cut-offs in the plot
+
+```{r}
+mycols <- rep("gray", nrow(res))
+mycols[ abs(res$log2FoldChange) > 2] <- "blue"
+mycols[ res$padj > 0.05 ] <- "gray"
+
+ggplot(res) +
+  aes(log2FoldChange, -log(padj), color = mycols) +
+  geom_point() +
+  geom_vline(xintercept = c(-2, 2), color = "red") +
+  geom_hline(yintercept = -log(0.05), color = "red") +
+  scale_color_identity()
+  
+```
+
+## Add Annotation
+
+Add gene symbols and entrez ids
+
+```{r}
+library(AnnotationDbi)
+library(org.Hs.eg.db)
+```
+
+```{r}
+res$symbol <- mapIds(x=org.Hs.eg.db, 
+                     keys=row.names(res),
+                     keytype = "ENSEMBL",
+                     column = "SYMBOL")
+```
+```{r}
+res$symbol <- mapIds(x=org.Hs.eg.db, 
+                     keys=row.names(res),
+                     keytype = "ENSEMBL",
+                     column = "ENTREZID" )
+```
+
+
+## Pathway Analysis
+
+Run gage analysis
+
+```{r, message=FALSE}
+library(gage)
+library(gageData)
+library(pathview)
+```
+
+We need a named vector of fold-change values as input for gage
+
+```{r}
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+```
+
+```{r}
+data(kegg.sets.hs)
+
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+```
+
+```{r}
+head(keggres$less, 2)
+```
+```{r}
+pathview(pathway.id = "hsa04110", gene.data=foldchanges)
+```
+
+![](hsa04110.xml)
+
+
+### GO terms
+
+Same analysis but using GO genesets rather than KEGG
+```{r}
+data(go.sets.hs)
+data(go.subs.hs)
+
+# Focus on Biological Process subset of GO
+gobpsets = go.sets.hs[go.subs.hs$BP]
+
+gobpres = gage(foldchanges, gsets=gobpsets)
+```
+
+```{r}
+head(gobpres$less, 4)
+```
+
+### Reactome
+
+Lots of folks like the reactome web interface. You can also run this as an R function but lets look at the website first < https://reactome.org/ >
+
+The website wants a text file with one gene symbol per line of the genes you want to map to pathways. 
+
+```{r}
+sig_genes <- res[res$padj <= 0.05 & !is.na(res$padj), ]$symbol
+head(sig_genes) #res$symbol
+```
+
+and write out to a file: 
+```{r}
+write.table(sig_genes, file="significant_genes.txt", 
+            row.names=FALSE, col.names=FALSE, quote=FALSE)
+```
+
+
+
+## Save Our Results
+
+```{r}
+write.csv(res, file="myresults.csv")
+```
+
+
