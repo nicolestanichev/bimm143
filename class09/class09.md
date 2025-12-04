@@ -219,6 +219,7 @@ view.pdb(hiv) |>
     PhantomJS not found. You can install it with webshot::install_phantomjs(). If it is installed, please make sure the phantomjs executable can be found via the PATH variable.
 
     file:////private/var/folders/x1/9bbvsbhn3vs151vy2jr02xb40000gn/T/RtmpCsALNF/file31da2cc29320/widget31da1a4930d5.html screenshot completed
+    file:////private/var/folders/x1/9bbvsbhn3vs151vy2jr02xb40000gn/T/RtmpSAQvvE/file34d7443fb385/widget34d7322303c4.html screenshot completed
 
 ![](class09_files/figure-commonmark/unnamed-chunk-13-1.png)
 
@@ -235,6 +236,7 @@ view.pdb(hiv, highlight = sel,
 ```
 
     file:////private/var/folders/x1/9bbvsbhn3vs151vy2jr02xb40000gn/T/RtmpCsALNF/file31da4b290035/widget31da70ccbe1f.html screenshot completed
+    file:////private/var/folders/x1/9bbvsbhn3vs151vy2jr02xb40000gn/T/RtmpSAQvvE/file34d719f5bfd0/widget34d75503fe00.html screenshot completed
 
 ![](class09_files/figure-commonmark/unnamed-chunk-14-1.png)
 
@@ -281,8 +283,8 @@ adk
 m <- nma(adk)
 ```
 
-     Building Hessian...        Done in 0.013 seconds.
-     Diagonalizing Hessian...   Done in 0.276 seconds.
+     Building Hessian...        Done in 0.012 seconds.
+     Diagonalizing Hessian...   Done in 0.278 seconds.
 
 ``` r
 plot(m)
@@ -300,6 +302,6 @@ mktrj(m, file="ADK_nma.pdb")
 view.nma(m)
 ```
 
-    file:////private/var/folders/x1/9bbvsbhn3vs151vy2jr02xb40000gn/T/RtmpCsALNF/file31da3ed88e32/widget31da7b5f94d9.html screenshot completed
+    file:////private/var/folders/x1/9bbvsbhn3vs151vy2jr02xb40000gn/T/RtmpSAQvvE/file34d729a20c1d/widget34d74dc95945.html screenshot completed
 
 ![](class09_files/figure-commonmark/unnamed-chunk-18-1.png)
