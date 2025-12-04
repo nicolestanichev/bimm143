@@ -1,7 +1,7 @@
 ---
 title: "Class 6: R functions"
 author: "Nicole (PID:A18116280)"
-format: pdf
+format: gfm
 ---
 
 All functions in R have at least 3 things: 
