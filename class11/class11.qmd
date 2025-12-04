@@ -1,7 +1,7 @@
 ---
 title: "Class 11: Structural Bioinformatics pt 2"
 author: "Nicole (PID: A18116280)"
-format: pdf
+format: gfm
 ---
 
 ## AlphaFold Data Base (AFDB)
